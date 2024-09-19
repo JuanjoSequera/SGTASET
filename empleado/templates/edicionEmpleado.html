@@ -1,0 +1,56 @@
+{% extends 'layout.html' %}
+
+{% block title %}Gestión de empleados{% endblock %}
+
+{% block content %}
+<div class="row py-2 justify-content-center">
+    <div class="col-sm-12 col-md-4">
+        <h2>Gestión de empleados</h2>
+        <div class="card card-center">
+            <div class="card-body">
+                <form action="/empleado/editarEmpleado/{{empleado.ID_Empleado}}" method="POST">{% csrf_token %}
+                    <div class="form-group py-2">
+                        <input type="text" id="txtNombre" name="txtNombre" value="{{empleado.Nombre}}"
+                            class="form-control" placeholder="Nombre" required>
+                    </div>
+                    <div class="form-group py-2">
+                        <input type="text" id="txtApellido" name="txtApellido" value="{{empleado.Apellido}}"
+                            class="form-control" placeholder="Apellido" required>
+                    </div>
+                    <div class="form-group py-2">
+                        <input type="number" id="txtCI" name="txtCI" value="{{empleado.CI}}" class="form-control"
+                            placeholder="CI" required>
+                    </div>
+                    <div class="form-group py-2">
+                        <input type="number" id="txtTelefono" name="txtTelefono" value="{{empleado.Telefono}}"
+                            class="form-control" placeholder="Teléfono" required>
+                    </div>
+                    <div class="form-group py-2">
+                        <input type="text" id="txtDireccion" name="txtDireccion" value="{{empleado.Direccion}}"
+                            class="form-control" placeholder="Dirección" required>
+                    </div>
+                    <div class="form-group py-2">
+                        <input type="text" id="txtMail" name="txtMail" value="{{empleado.Mail}}" class="form-control"
+                            placeholder="Mail" required>
+                    </div>
+                    <div class="form-group py-2">
+                        <input type="number" id="txtSalario" name="txtSalario" value="{{empleado.Salario}}"
+                            class="form-control" placeholder="Salario" required>
+                    </div>
+                    <div class="form-group py-2">
+                        <select id="ddlCargo" name="ddlCargo" class="form-control" required>
+                            <option value="" selected disabled>Seleccione un cargo</option>
+                            {% for cargo in cargos %}
+                            <option value="{{ cargo.id_cargo }}">{{ cargo.nombre_cargo }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success bt-block text-white">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

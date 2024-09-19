@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+
+{% block title %} Gestion de cargos {% endblock %}
+
+{% block content %}
+
+<div class="row py-2 justify-content-center">
+    <div class="col-sm-12 col-md-4">
+        <h2>Gestión de cargos</h2>
+            <div class="card card-center">
+                <div class="card-body">
+                    <form action="/cargo/editarCargo/{{cargo.id_cargo}}" method="POST">{% csrf_token %}
+                    <div class="form-group">
+                            <input type="text" id="txtCargo" name="txtCargo" value="{{cargo.nombre_cargo}}" class="form-control" placeholder="Cargo" required>
+                        </div>
+                        <div class="d-grid py-2">
+                                <button type="submit" class="btn btn-success bt-block text-white">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+    </div>
+</div>
+
+{% endblock %}

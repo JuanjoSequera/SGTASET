@@ -1,0 +1,182 @@
+{% extends 'layout.html' %}
+
+{% block title %} Gestion de tareas {% endblock %}
+
+{% block content %}
+<div class="row py-2">
+    <div class="col-sm-12">
+        <!-- mensaje de pantalla -->
+        {% for message in messages %}
+            {% if message.tags == 'warning' %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                var m = '{{ message }}'
+                Swal.fire(
+                    '',
+                    m,
+                    'warning'
+                )
+            </script>
+            {% elif message.tags == 'error' %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                var m = '{{ message }}'
+                Swal.fire(
+                    '',
+                    m,
+                    'error'
+                )
+            </script>
+            {% else %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                var m = '{{ message }}'
+                Swal.fire(
+                    '',
+                    m,
+                    'success'
+                )
+            </script>
+            {% endif %}
+        {% endfor %}
+        <h1>Listado de tareas</h1>
+        <!-- Botón para abrir la modal de registrar tarea -->
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#registrarTareaModal">
+            <i class="bi bi-plus"></i> Registrar Tarea
+        </button>
+
+        <!-- Formulario de búsqueda -->
+        <form class="form-inline my-2 my-lg-0" action="{% url 'tarea' %}" method="GET">
+            <div class="input-group mb-3" style="width: 30%;">
+                <button class="btn btn-outline-success" type="submit"><i class="bi bi-search"></i> Buscar</button>
+                <input class="form-control mr-sm-2" type="search" name="q" placeholder="Buscar por nombre" aria-label="Buscar">
+            </div>
+        </form>
+
+        <div class="table responsive py-2">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID Tarea</th>
+                        <th>Nombre</th>
+                        <th colspan="2">Opciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tarea in tareas_pagina %}
+                    <tr>
+                        <td>{{tarea.ID_Tarea}}</td>
+                        <td>{{tarea.Nombre}}</td>
+                        <td><button type="button" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#editarTareaModal{{ tarea.ID_Tarea }}"><i class="bi bi-credit-card-fill"></i> Editar</button></td>
+                        <td><a href="/tarea/eliminarTarea/{{tarea.ID_Tarea}}" class="btn btn-danger btnEliminacion"><i class="bi bi-trash-fill"></i> Eliminar</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    <!-- Paginación -->
+    <nav aria-label="Paginación de tareas">
+        <ul class="pagination justify-content-center">
+            {% if tareas_pagina.has_previous %}
+                <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page=1">&laquo; Primera</a>
+                </li>
+                <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page={{ tareas_pagina.previous_page_number }}">Anterior</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span style="color: black;" class="page-link">&laquo; Primera</span>
+                </li>
+                <li class="page-item disabled">
+                    <span style="color: black;" class="page-link">Anterior</span>
+                </li>
+            {% endif %}
+
+            {% for i in tareas_pagina.paginator.page_range %}
+                {% if tareas_pagina.number == i %}
+                    <li class="page-item active">
+                        <span style="color: black;" class="page-link">{{ i }}</span>
+                    </li>
+                {% else %}
+                    {% if i > tareas_pagina.number|add:-7 and i < tareas_pagina.number|add:8 %}
+                    <li class="page-item">
+                        <a style="color: black;" class="page-link" href="?page={{ i }}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            {% if tareas_pagina.has_next %}
+                <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page={{ tareas_pagina.next_page_number }}">Siguiente</a>
+                </li>
+                <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page={{ tareas_pagina.paginator.num_pages }}">Última</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Siguiente</span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">Última</span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    </div>
+</div>
+
+<!-- Modal para registrar tarea -->
+<div class="modal fade" id="registrarTareaModal" tabindex="-1" aria-labelledby="registrarTareaModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white" id="registrarTareaModalLabel">Registrar Tarea</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/tarea/registrarTarea/" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" id="txtTarea" name="txtTarea" class="form-control" placeholder="Tarea"
+                            required>
+                    </div>
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success bt-block text-white">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for tarea in tareas_pagina %}
+<!-- Modal para editar la tarea -->
+<div class="modal fade" id="editarTareaModal{{ tarea.ID_Tarea }}" tabindex="-1" aria-labelledby="editarTareaModalLabel{{ tarea.ID_Tarea }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white" id="editarTareaModalLabel{{ tarea.ID_Tarea }}">Editar Tarea</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'editarTarea' tarea.ID_Tarea %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" id="txtTarea" name="txtTarea" value="{{ tarea.Nombre }}" class="form-control"
+                            placeholder="Tarea" required>
+                    </div>
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success bt-block text-white">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

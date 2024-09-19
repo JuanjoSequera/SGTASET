@@ -1,0 +1,52 @@
+{% extends 'layout.html' %}
+
+{% block title %}Edición de transferencia{% endblock %}
+
+{% block content %}
+<div class="row py-2 justify-content-center">
+    <div class="col-sm-12 col-md-4">
+        <h2>Edición de transferencia</h2>
+        <div class="card card-center">
+            <div class="card-body">
+                <form action="{% url 'editarTransferencia' transferencia.ID_Transferencias %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group py-2">
+                        <select id="ddlMaterialDepositoOrigen" name="ddlMaterialDepositoOrigen" class="form-control" required>
+                            <option value="" selected disabled>Seleccione un material - depósito origen</option>
+                            {% for material_x_deposito in materiales_x_depositos %}
+                            <option value="{{ material_x_deposito.ID_MXD }}">{{ material_x_deposito.ID_Material }} -
+                                {{ material_x_deposito.ID_Deposito }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group py-2">
+                        <select id="ddlMaterialDepositoDestino" name="ddlMaterialDepositoDestino" class="form-control"
+                            required>
+                            <option value="" selected disabled>Seleccione un material - depósito destino</option>
+                            {% for material_x_deposito in materiales_x_depositos %}
+                            <option value="{{ material_x_deposito.ID_MXD }}">{{ material_x_deposito.ID_Material }} -
+                                {{ material_x_deposito.ID_Deposito }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group py-2">
+                        <select id="ddlEmpleado" name="ddlEmpleado" class="form-control" required>
+                            <option value="" selected disabled>Seleccione un empleado</option>
+                            {% for empleado in empleados %}
+                            <option value="{{ empleado.ID_Empleado }}">{{ empleado.Nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group py-2">
+                        <input type="number" id="txtCantidad" name="txtCantidad" value="{{ transferencia.Cantidad }}"
+                            class="form-control" placeholder="Cantidad" required>
+                    </div>
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success bt-block text-white">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

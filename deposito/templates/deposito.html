@@ -1,0 +1,234 @@
+{% extends 'layout.html' %}
+
+{% block title %}Gestión de depósitos{% endblock %}
+
+{% block content %}
+<div class="row py-2">
+    <div class="col-12">
+        <!-- mensaje de pantalla -->
+        {% for message in messages %}
+            {% if message.tags == 'warning' %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                var m = '{{ message }}'
+                Swal.fire(
+                    '',
+                    m,
+                    'warning'
+                )
+            </script>
+            {% elif message.tags == 'error' %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                var m = '{{ message }}'
+                Swal.fire(
+                    '',
+                    m,
+                    'error'
+                )
+            </script>
+            {% else %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                var m = '{{ message }}'
+                Swal.fire(
+                    '',
+                    m,
+                    'success'
+                )
+            </script>
+            {% endif %}
+        {% endfor %}
+        <h1>Gestión de depósitos</h1>
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal"
+            data-bs-target="#agregarDepositoModal"><i class="bi bi-plus"></i> Agregar Nuevo</button>
+        <!-- Formulario de búsqueda -->
+        <form class="form-inline my-2 my-lg-0" action="{% url 'depositos' %}" method="GET">
+            <div class="input-group mb-3" style="width: 30%;">
+                <button class="btn btn-outline-success" type="submit"><i class="bi bi-search"></i> Buscar</button>
+                <input class="form-control mr-sm-2" type="search" name="q" placeholder="Buscar por nombre" aria-label="Buscar">
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID Depósito</th>
+                        <th>Encargado</th>
+                        <th>Nombre Depósito</th>
+                        <th>Tipo Depósito</th>
+                        <th colspan="2">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for deposito in depositos %}
+                    <tr>
+                        <td>{{ deposito.id_deposito }}</td>
+                        <td>{{ deposito.ID_Empleado.Nombre }} {{ deposito.ID_Empleado.Apellido }}</td>
+                        <td>{{ deposito.nombre_deposito }}</td>
+                        <td>{{ deposito.tipo_deposito }}</td>
+                        <td><a href="/deposito/edicionDeposito/{{ deposito.id_deposito }}" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#editarDepositoModal{{ deposito.id_deposito }}"><i class="bi bi-credit-card-fill"></i> Editar</a></td>
+                        <td><a href="/deposito/eliminarDeposito/{{ deposito.id_deposito }}" class="btn btn-danger btnEliminacion"><i class="bi bi-trash-fill"></i> Eliminar</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        <nav aria-label="Paginación de depósitos">
+            <ul class="pagination justify-content-center">
+                {% if depositos.has_previous %}
+                    <li class="page-item">
+                        <a style="color: black;" class="page-link" href="?page=1">&laquo; Primera</a>
+                    </li>
+                    <li class="page-item">
+                        <a style="color: black;" class="page-link"
+                            href="?page={{ depositos.previous_page_number }}">Anterior</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span style="color: black;" class="page-link">&laquo; Primera</span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span style="color: black;" class="page-link">Anterior</span>
+                    </li>
+                {% endif %}
+
+                {% for i in depositos.paginator.page_range %}
+                    {% if depositos.number == i %}
+                        <li class="page-item active">
+                            <span style="color: black;" class="page-link">
+                                {{ i }}
+                            </span>
+                        </li>
+                    {% else %}
+                        {% if i > depositos.number|add:-7 and i < depositos.number|add:8 %} <li class="page-item">
+                            <a style="color: black;" class="page-link" href="?page={{ i }}">{{ i }}</a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                    {% if depositos.has_next %}
+                        <li class="page-item">
+                            <a style="color: black;" class="page-link"
+                                href="?page={{ depositos.next_page_number }}">Siguiente</a>
+                        </li>
+                        <li class="page-item">
+                            <a style="color: black;" class="page-link"
+                                href="?page={{ depositos.paginator.num_pages }}">&raquo;
+                                Última</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Siguiente</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo; Última</span>
+                        </li>
+                    {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<!-- Modal Agregar Nuevo Depósito -->
+<div class="modal fade" id="agregarDepositoModal" tabindex="-1" aria-labelledby="agregarDepositoModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white" id="agregarDepositoModalLabel">Agregar Nuevo Depósito</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/deposito/registrarDeposito/" method="POST">{% csrf_token %}
+                    <div class="form-group form-floating py-2">
+                        <select id="ddlEmpleado" name="ddlEmpleado" class="form-control" required>
+                            <option value="" selected disabled>Seleccione un encargado</option>
+                            {% for empleado in empleados %}
+                            <option value="{{ empleado.ID_Empleado }}">{{ empleado.Nombre }} {{ empleado.Apellido }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <label for="ddlEmpleado">Encargado</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="text" id="txtNombreDeposito" name="txtNombreDeposito" class="form-control" placeholder="" required>
+                        <label for="txtNombreDeposito">Nombre deposito</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <select id="ddlTipoDeposito" name="ddlTipoDeposito" class="form-control" required>
+                            <option value="" selected disabled>Seleccione el tipo de depósito</option>
+                            <option value="Móvil">Móvil</option>
+                            <option value="Depósito general">Depósito general</option>
+                            <!-- Agrega más opciones si es necesario -->
+                        </select>
+                        <label for="ddlTipoDeposito">Tipo de depósito</label>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for deposito in depositos %}
+<!-- Modal para editar el depósito -->
+<div class="modal fade" id="editarDepositoModal{{ deposito.id_deposito }}" tabindex="-1"
+    aria-labelledby="editarDepositoModalLabel{{ deposito.id_deposito }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white" id="editarDepositoModalLabel{{ deposito.id_deposito }}">Editar
+                    Depósito</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'editarDeposito' deposito.id_deposito %}" method="POST">{% csrf_token %}
+                    <div class="form-group form-floating py-2">
+                        <select id="ddlEmpleado" name="ddlEmpleado" class="form-control" required>
+                            {% for empleado in empleados %}
+                                {% if empleado.ID_Empleado == deposito.ID_Empleado.ID_Empleado %}
+                                    <option value="{{ empleado.ID_Empleado }}" selected>{{ empleado.Nombre }} {{ empleado.Apellido }}</option>
+                                {% else %}
+                                    <option value="{{ empleado.ID_Empleado }}">{{ empleado.Nombre }} {{ empleado.Apellido }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <label for="ddlEmpleado">Empleado</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="text" id="txtNombreDeposito" name="txtNombreDeposito"
+                            value="{{ deposito.nombre_deposito }}" class="form-control" placeholder="Nombre Depósito"
+                            required>
+                        <label for="txtNombreDeposito">Tipo de depósito</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <select id="ddlTipoDeposito" name="ddlTipoDeposito" class="form-control" required>
+                            {% if deposito.tipo_deposito == 'Depósito general' %}
+                                <option value="Depósito general">Depósito general</option>
+                                <option value="Móvil">Móvil</option>
+                            {% else %}
+                                <option value="Móvil">Móvil</option>
+                                <option value="Depósito general">Depósito general</option>
+                            {% endif %}
+                        </select>
+                        <label for="ddlTipoDeposito">Tipo de depósito</label>
+                    </div>
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success bt-block text-white"><i class="bi bi-save"></i>
+                            Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

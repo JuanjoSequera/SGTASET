@@ -1,0 +1,188 @@
+{% extends 'layout.html' %}
+
+{% block title %}Gestión de cargos{% endblock %}
+
+{% block content %}
+<div class="row py-2">
+    <div class="col-12">
+        <!-- mensaje de pantalla -->
+        {% for message in messages %}
+            {% if message.tags == 'warning' %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                var m = '{{ message }}'
+                Swal.fire(
+                    '',
+                    m,
+                    'warning'
+                )
+            </script>
+            {% elif message.tags == 'error' %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                var m = '{{ message }}'
+                Swal.fire(
+                    '',
+                    m,
+                    'error'
+                )
+            </script>
+            {% else %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                var m = '{{ message }}'
+                Swal.fire(
+                    '',
+                    m,
+                    'success'
+                )
+            </script>
+            {% endif %}
+        {% endfor %}
+        <h1>Gestión de cargos</h1>
+        <!-- Botón para abrir la modal de agregar cargo -->
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#agregarCargoModal">
+            <i class="bi bi-plus"></i> Agregar Cargo
+        </button>
+        </form>
+        <!-- Formulario de búsqueda -->
+        <form class="form-inline my-2 my-lg-0" action="{% url 'cargo' %}" method="GET">
+            <div class="input-group mb-3" style="width: 30%;">
+                <button class="btn btn-outline-success" type="submit"><i class="bi bi-search"></i> Buscar</button>
+                <input class="form-control" type="search" name="q" placeholder="Buscar por nombre" aria-label="Buscar">
+            </div>
+        </form>
+        <div class="table responsive py-2">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID Cargo</th>
+                        <th>Nombre</th>
+                        <th colspan="2">Opciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cargo in cargos_pagina %}
+                    <tr>
+                        <td>{{ cargo.id_cargo }}</td>
+                        <td>{{ cargo.nombre_cargo }}</td>
+                        <td><a href="#" class="btn btn-info text-white" data-bs-toggle="modal"
+                                data-bs-target="#editarCargoModal{{ cargo.id_cargo }}">
+                                <i class="bi bi-credit-card-fill"></i> Editar
+                            </a></td>
+                        <td><a href="/cargo/eliminarCargo/{{ cargo.id_cargo }}"class="btn btn-danger btnEliminacion"><i class="bi bi-trash"></i> Eliminar</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        <nav aria-label="Paginación de cargos">
+            <ul class="pagination justify-content-center">
+                {% if cargos_pagina.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">&laquo; Primera</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ cargos_pagina.previous_page_number }}">Anterior</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo; Primera</span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">Anterior</span>
+                </li>
+                {% endif %}
+        
+                {% for i in cargos_pagina.paginator.page_range %}
+                {% if cargos_pagina.number == i %}
+                <li class="page-item active">
+                    <span class="page-link">{{ i }}</span>
+                </li>
+                {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+        
+                {% if cargos_pagina.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ cargos_pagina.next_page_number }}">Siguiente</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ cargos_pagina.paginator.num_pages }}">Última</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Siguiente</span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">Última</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        
+    </div>
+</div>
+
+<!-- Modal para agregar cargo -->
+<div class="modal fade" id="agregarCargoModal" tabindex="-1" aria-labelledby="agregarCargoModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white" id="agregarCargoModalLabel">Agregar Cargo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/cargo/registrarCargo/" method="POST">
+                    {% csrf_token %}
+                    <div class="form-floating">
+                        <input type="text" id="txtCargo" name="txtCargo" class="form-control" placeholder="Cargo"
+                            required>
+                        <label for="txtCargo">Nombre del cargo</label>
+                    </div>
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success bt-block text-white"><i class="bi bi-save"></i> Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% for cargo in cargos_pagina %}
+<!-- Modal para editar cargo -->
+<div class="modal fade" id="editarCargoModal{{ cargo.id_cargo }}" tabindex="-1"
+    aria-labelledby="editarCargoModalLabel{{ cargo.id_cargo }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white" id="editarCargoModalLabel{{ cargo.id_cargo }}">Editar Cargo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/cargo/editarCargo/{{ cargo.id_cargo }}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-floating">
+                        <input type="text" id="txtCargo" name="txtCargo" value="{{ cargo.nombre_cargo }}"
+                            class="form-control" placeholder="Cargo" required>
+                        <label for="txtCargo">Nombre del cargo</label>
+                    </div>
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success bt-block text-white">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+{% endblock %}

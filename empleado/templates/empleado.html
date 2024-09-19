@@ -1,0 +1,272 @@
+{% extends 'layout.html' %}
+
+{% block title %}Gestión de empleados{% endblock %}
+
+{% block content %}
+<div class="row py-2">
+    <div class="col-12">
+        <!-- mensaje de pantalla -->
+        {% for message in messages %}
+            {% if message.tags == 'warning' %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                var m = '{{ message }}'
+                Swal.fire(
+                    '',
+                    m,
+                    'warning'
+                )
+            </script>
+            {% elif message.tags == 'error' %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                var m = '{{ message }}'
+                Swal.fire(
+                    '',
+                    m,
+                    'error'
+                )
+            </script>
+            {% else %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                var m = '{{ message }}'
+                Swal.fire(
+                    '',
+                    m,
+                    'success'
+                )
+            </script>
+            {% endif %}
+        {% endfor %}
+        <h1>Gestión de empleados</h1>
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#agregarEmpleadoModal"><i class="bi bi-plus"></i> Agregar Nuevo</button>
+        <!-- Formulario de búsqueda -->
+        <form class="form-inline my-2 my-lg-0" action="{% url 'empleado' %}" method="GET">
+            <div class="input-group mb-3" style="width: 50%;">
+                <button class="btn btn-outline-success" type="submit"><i class="bi bi-search"></i> Buscar</button>
+                <input class="form-control mr-sm-2" type="search" name="q" placeholder="Buscar por nombre" aria-label="Buscar">
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID Empleado</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>CI</th>
+                        <th>Teléfono</th>
+                        <th>Dirección</th>
+                        <th>Mail</th>
+                        <th>Salario</th>
+                        <th>Cargo</th>
+                        <th colspan="2">Opciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for empleado in empleados %}
+                    <tr>
+                        <td>{{ empleado.ID_Empleado }}</td>
+                        <td>{{ empleado.Nombre }}</td>
+                        <td>{{ empleado.Apellido }}</td>
+                        <td>{{ empleado.CI }}</td>
+                        <td>{{ empleado.Telefono }}</td>
+                        <td>{{ empleado.Direccion }}</td>
+                        <td>{{ empleado.Mail }}</td>
+                        <td>{{ empleado.Salario|floatformat:2}}</td>
+                        <td>{{ empleado.ID_Cargo.nombre_cargo }}</td>
+                        <td><a href="/empleado/edicionEmpleado/{{ empleado.ID_Empleado }}"
+                                class="btn btn-info text-white" data-bs-toggle="modal"
+                                data-bs-target="#editarEmpleadoModal{{ empleado.ID_Empleado }}"><i
+                                    class="bi bi-pencil"></i> Editar</a></td>
+                        <td><a href="/empleado/eliminarEmpleado/{{ empleado.ID_Empleado }}"
+                                class="btn btn-danger btnEliminacion"><i class="bi bi-trash"></i> Eliminar</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        <nav aria-label="Paginación de empleados">
+            <ul class="pagination justify-content-center">
+                {% if empleados.has_previous %}
+                <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page=1">&laquo; Primera</a>
+                </li>
+                <li class="page-item">
+                    <a style="color: black;" class="page-link"
+                        href="?page={{ empleados.previous_page_number }}">Anterior</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span style="color: black;" class="page-link">&laquo; Primera</span>
+                </li>
+                <li class="page-item disabled">
+                    <span style="color: black;" class="page-link">Anterior</span>
+                </li>
+                {% endif %}
+
+                {% for i in empleados.paginator.page_range %}
+                {% if empleados.number == i %}
+                <li class="page-item active">
+                    <span style="color: black;" class="page-link">
+                        {{ i }}
+                    </span>
+                </li>
+                {% else %}
+                {% if i > empleados.number|add:-7 and i < empleados.number|add:8 %} <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page={{ i }}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if empleados.has_next %}
+                    <li class="page-item">
+                        <a style="color: black;" class="page-link"
+                            href="?page={{ empleados.next_page_number }}">Siguiente</a>
+                    </li>
+                    <li class="page-item">
+                        <a style="color: black;" class="page-link"
+                            href="?page={{ empleados.paginator.num_pages }}">&raquo;
+                            Última</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Siguiente</span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">&raquo; Última</span>
+                    </li>
+                    {% endif %}
+            </ul>
+        </nav>
+
+    </div>
+</div>
+
+
+<!-- Modal Agregar Nuevo Empleado -->
+<div class="modal fade" id="agregarEmpleadoModal" tabindex="-1" aria-labelledby="agregarEmpleadoModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white" id="agregarEmpleadoModalLabel">Agregar Nuevo Empleado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/empleado/registrarEmpleado/" method="POST">{% csrf_token %}
+                    <div class="form-group form-floating py-2">
+                        <input type="text" id="txtNombre" name="txtNombre" class="form-control" placeholder="" required>
+                        <label for="txtNombre">Nombre</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="text" id="txtApellido" name="txtApellido" class="form-control" placeholder="" required>
+                        <label for="txtApellido">Apellido</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="number" id="txtCI" name="txtCI" class="form-control" placeholder="" required>
+                        <label for="txtCI">CI</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="number" id="txtTelefono" name="txtTelefono" class="form-control" placeholder="" required>
+                        <label for="txtTelefono">Telefono</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="text" id="txtDireccion" name="txtDireccion" class="form-control" placeholder="" required>
+                        <label for="txtDireccion">Direccion</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="email" id="txtMail" name="txtMail" class="form-control" placeholder="" required>
+                        <label for="txtMail">Mail</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="number" id="txtSalario" name="txtSalario" class="form-control" placeholder="" required>
+                        <label for="txtSalario">Salario</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <select id="ddlCargo" name="ddlCargo" class="form-control" required>
+                            <option value="" selected disabled>Seleccione un cargo</option>
+                            {% for cargo in cargos %}
+                            <option value="{{ cargo.id_cargo }}">{{ cargo.nombre_cargo }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="ddlCargo">Cargo</label>
+                    </div>
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for empleado in empleados %}
+<!-- Modal para editar el empleado -->
+<div class="modal fade" id="editarEmpleadoModal{{ empleado.ID_Empleado }}" tabindex="-1"
+    aria-labelledby="editarEmpleadoModalLabel{{ empleado.ID_Empleado }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white" id="editarEmpleadoModalLabel{{ empleado.ID_Empleado }}">Editar
+                    Empleado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/empleado/editarEmpleado/{{ empleado.ID_Empleado }}" method="POST">{% csrf_token %}
+                    <div class="form-group form-floating py-2">
+                        <input type="text" id="txtNombre" name="txtNombre" class="form-control" value="{{ empleado.Nombre }}" required>
+                        <label for="txtNombre">Nombre</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="text" id="txtApellido" name="txtApellido" class="form-control" value="{{ empleado.Apellido }}" required>
+                        <label for="txtApellido">Apellido</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="number" id="txtCI" name="txtCI" class="form-control" value="{{ empleado.CI }}" required>
+                        <label for="txtCI">CI</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="number" id="txtTelefono" name="txtTelefono" class="form-control" value="{{ empleado.Telefono }}" required>
+                        <label for="txtTelefono">Telefono</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="text" id="txtDireccion" name="txtDireccion" class="form-control" value="{{ empleado.Direccion }}" required>
+                        <label for="txtDireccion">Direccion</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="email" id="txtMail" name="txtMail" class="form-control" value="{{ empleado.Mail }}" required>
+                        <label for="txtMail">Mail</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="number" id="txtSalario" name="txtSalario" class="form-control" value="{{ empleado.Salario }}" required>
+                        <label for="txtSalario">Salario</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <select id="ddlCargo" name="ddlCargo" class="form-control" required>
+                            {% for cargo in cargos %}
+                                {% if empleado.ID_Cargo_id == cargo.id_cargo %}
+                                    <option value="{{ cargo.id_cargo }}" selected>{{ cargo.nombre_cargo }}</option>
+                                {% else %}
+                                    <option value="{{ cargo.id_cargo }}">{{ cargo.nombre_cargo }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <label for="ddlCargo">Cargo</label>
+                    </div>
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endfor %}
+
+{% endblock %}

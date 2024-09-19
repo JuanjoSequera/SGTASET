@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+
+{% block title %}Gestión de depositos{% endblock %}
+
+{% block content %}
+<div class="row py-2 justify-content-center">
+    <div class="col-sm-12 col-md-4">
+        <h2>Gestión depositos</h2>
+        <div class="card card-center">
+            <div class="card-body">
+                <form action="{% url 'editarDeposito' depositos.id_deposito %}" method="POST">{% csrf_token %}
+                    <div class="form-group py-2">
+                        <select id="ddlEmpleado" name="ddlEmpleado" class="form-control" required>
+                            <option value="" selected disabled>Seleccione un empleado</option>
+                            {% for empleado in empleados %}
+                            <option value="{{ empleado.ID_Empleado }}">{{ empleado.Nombre }} {{ empleado.Apellido }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group py-2">
+                        <input type="text" id="txtNombreDeposito" name="txtNombreDeposito" value="{{ deposito.nombre_deposito }}"
+                            class="form-control" placeholder="Nombre Depósito" required>
+                    </div>
+
+                    <div class="form-group py-2">
+                        <select id="ddlTipoDeposito" name="ddlTipoDeposito" class="form-control" required>
+                            <option value="" selected disabled>Seleccione el tipo de depósito</option>
+                            <option value="Móvil">Móvil</option>
+                            <option value="Depósito general">Depósito general</option>
+                            <!-- Agrega más opciones si es necesario -->
+                        </select>
+                    </div>
+
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success bt-block text-white">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

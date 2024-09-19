@@ -1,0 +1,224 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<html>
+<head>
+    <title>Órdenes</title>
+    <style>
+        /* Estilos para las etiquetas de los formularios */
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        th, td {
+        min-width: 200px; /* Adjust the width as needed */
+        max-width: 200px; /* Adjust the width as needed */
+    }
+    </style>
+</head>
+<body>
+    <div class="row py-2">
+        <h1 style="text-align: center;">Lista de órdenes</h1>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <!-- Formulario de importar archivo CSV para clientes nuevos y duplicados-->
+                <form method="post" enctype="multipart/form-data" action="{% url 'importar_csv_orden' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="file" name="files" accept=".csv, .txt" class="form-control-file" id="files_input" multiple>
+                    </div>
+                    <div class="d-flex" style="margin-top: 1%;">
+                        <button type="submit" class="btn btn-success btn-sm" id="import_files_button" disabled>
+                            <i class="bi bi-cloud-upload"></i> Importar archivos CSV y TXT
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Formulario de búsqueda -->
+        <form class="form-inline my-2 my-lg-0" method="GET" action="{% url 'orden' %}">
+            <div class="input-group mb-3" style="width: 30%;">
+                <button class="btn btn-outline-success" type="submit"><i class="bi bi-search"></i> Buscar</button>
+                <input class="form-control mr-sm-2" type="text" name="search" placeholder="Buscar" aria-label="Buscar">
+            </div>
+        </form>
+    </div>    
+    
+    <div class="table-responsive ">
+        <!-- Tabla de órdenes -->
+        <table class="table table-striped">
+            <!-- Encabezado de la tabla -->
+            <thead>
+                <tr>
+                    <th>Nro. Orden</th>
+                    <th>Empleado Técnico</th>
+                    <th>Empleado Ayudante</th>
+                    <th>ID Tareas</th>
+                    <th>ID Depósito</th>
+                    <th>Franquicia</th>
+                    <th>Base</th>
+                    <th>MGT</th>
+                    <th>Area Agendada</th>
+                    <th>Número de abonado</th>
+                    <th>Nombre y Apellido</th>
+                    <th>Dirección</th>
+                    <th>Telefono</th>
+                    <th>Plan</th>
+                    <th> Horario de disponibilidad </th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Descripción</th>
+                    <th>Observación</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for orden in page_obj %}
+                <tr>
+                    <td>{{ orden.nro_orden }}</td>
+                    <td>{{ orden.ID_Empleado_tecnico.Nombre }} {{ orden.ID_Empleado_tecnico.Apellido }}</td>
+                    <td>{{ orden.ID_Empleado_ayudante.Nombre }} {{ orden.ID_Empleado_ayudante.Apellido }}</td>
+                    <td>{{ orden.ID_Tarea.Nombre }}</td>
+                    <td>{{ orden.id_deposito.nombre_deposito}}</td>
+                    <td>{{ orden.franquicia}}</td>
+                    <td>{{ orden.base}}</td>
+                    <td>{{ orden.hoja_de_ruta}}</td>
+                    <td>{{ orden.area_agendada}}</td>
+                    <td>{{ orden.numero_de_abono }}</td>
+                    <td>{{ orden.numero_de_abono.nombre }} {{orden.numero_de_abono.apellido}}</td>
+                    <td>{{ orden.numero_de_abono.direccion}}</td>
+                    <td>{{ orden.numero_de_abono.telefono}}</td>
+                    <td>{{ orden.plan}}</td>
+                    <td>{{ orden.horario}}</td>
+                    <td>{{ orden.fecha_inicio }}</td>
+                    <td>{{ orden.fecha_fin }}</td>
+                    <td>{{ orden.descripcion }}</td>
+                    <td></td>
+                    <td>{{ orden.estado }}</td>
+                    <td>
+                        <a href="{% url 'asignar_empleados_movil' orden.nro_orden %}" class="btn btn-primary btn-sm">Asignar</a>
+                    </td>
+                    
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <nav aria-label="Paginación de órdenes">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page=1">&laquo; Primera</a>
+                </li>
+                <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span style="color: black;" class="page-link">&laquo; Primera</span>
+                </li>
+                <li class="page-item disabled">
+                    <span style="color: black;" class="page-link">Anterior</span>
+                </li>
+            {% endif %}
+
+            {% for i in page_obj.paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <li class="page-item active">
+                        <span style="color: black;" class="page-link">
+                            {{ i }}
+                        </span>
+                    </li>
+                {% else %}
+                    {% if i > page_obj.number|add:-7 and i < page_obj.number|add:8 %}
+                        <li class="page-item">
+                            <a style="color: black;" class="page-link" href="?page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+                </li>
+                <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page={{ page_obj.paginator.num_pages }}">&raquo; Última</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Siguiente</span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo; Última</span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    {% if registros_duplicados %}
+        <p id="registros_duplicados">{{ registros_duplicados|length }} registros duplicados encontrados.</p>
+    {% endif %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|safe }}</p>
+        {% endfor %}
+    {% endif %}
+
+   
+
+    <script>
+        // Obtener los parámetros de la URL usando JavaScript
+        const urlParams = new URLSearchParams(window.location.search);
+        const numRegistrosNuevos = urlParams.get('nuevos');
+        const numRegistrosDuplicados = urlParams.get('duplicados');
+
+        // Mostrar los resultados como párrafos en la página
+        const registrosNuevosElement = document.getElementById('registros_nuevos');
+        const registrosDuplicadosElement = document.getElementById('registros_duplicados');
+
+        if (numRegistrosNuevos) {
+            registrosNuevosElement.textContent = `Cantidad de registros nuevos: ${numRegistrosNuevos}`;
+        }
+
+        if (numRegistrosDuplicados) {
+            registrosDuplicadosElement.textContent = `Cantidad de registros duplicados: ${numRegistrosDuplicados}`;
+        }
+
+        // Redireccionar a la página principal después de descargar el archivo CSV
+        window.onload = function() {
+            const importCsvButton = document.getElementById('import_files_button');
+            importCsvButton.addEventListener('click', function() {
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1000);
+            });
+        };
+    </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Obtener el input de archivo y el botón de importar CSV
+        var csvFileInput = document.getElementById('files_input');
+        var importCsvButton = document.getElementById('import_files_button');
+
+        // Agregar evento para habilitar/deshabilitar el botón cuando se seleccione un archivo
+        csvFileInput.addEventListener('change', function() {
+            if (csvFileInput.value) {
+                importCsvButton.disabled = false;
+            } else {
+                importCsvButton.disabled = true;
+            }
+        });
+    });
+</script>
+
+    
+</body>
+</html>
+{% endblock %}

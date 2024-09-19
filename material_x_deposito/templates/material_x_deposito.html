@@ -1,0 +1,174 @@
+{% extends 'layout.html' %}
+
+{% block title %}Gestión de materiales por depósito{% endblock %}
+
+{% block content %}
+<div class="row py-2">
+    <div class="col-sm-12">
+            {% for message in messages %}
+                {% if message.tags == 'warning' %}
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script>
+                    var m = '{{ message }}'
+                    Swal.fire(
+                        '',
+                        m,
+                        'warning'
+                    )
+                </script>
+                {% elif message.tags == 'error' %}
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script>
+                    var m = '{{ message }}'
+                    Swal.fire(
+                        '',
+                        m,
+                        'error'
+                    )
+                </script>
+                {% else %}
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script>
+                    var m = '{{ message }}'
+                    Swal.fire(
+                        '',
+                        m,
+                        'success'
+                    )
+                </script>
+                {% endif %}
+            {% endfor %}
+        <h2 class="text-center">Materiales por depósito</h2>
+        <!-- Formulario de búsqueda -->
+        <form class="form-inline justify-content-end my-2 my-lg-0" action="{% url 'material_x_deposito' %}" method="GET">
+                <div class="input-group mb-3" style="width: 30%;">
+                    <button class="btn btn-outline-success" type="submit"><i class="bi bi-search"></i> Buscar</button>
+                    <input class="form-control mr-sm-2" type="search" name="q" placeholder="Buscar por material o depósito"
+                        aria-label="Buscar">
+                </div>
+                <a href="{% url 'generar_pdf' %}?q={{ request.GET.q }}" class="btn btn-primary"><i class="bi bi-file-earmark-pdf"></i> Generar Reporte PDF</a>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-striped text-center">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Material</th>
+                        <th>Depósito</th>
+                        <th>Cantidad</th>
+                        <th>Stock Mínimo</th>
+                        <th>Stock Máximo</th>
+                        <th>Unidad de Medida</th>
+                        <th colspan="2">Opciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in materiales_deposito %}
+                    <tr>
+                        <td>{{ c.ID_MXD }}</td>
+                        <td>{{ c.ID_Material }}</td>
+                        <td>{{ c.ID_Deposito }}</td>
+                        <td>{{ c.Cantidad }}</td>
+                        <td>{{ c.Stock_min }}</td>
+                        <td>{{ c.Stock_max }}</td>
+                        <td>{{ c.Unidad_medida }}</td>
+                        <td><a href="#" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#editarMaterialDepositoModal{{ c.ID_MXD }}"><i class="bi bi-credit-card-fill"></i> Editar</a></td>
+                        <td><a href="{% url 'generar_ficha_pdf' material_x_deposito_id=c.ID_MXD %}" class="btn btn-secondary"><i class="bi bi-file-earmark-pdf"></i> Ficha PDF</a></td>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Paginación -->
+        <nav aria-label="Paginación de materiales por depósito" class="my-3">
+            <ul class="pagination justify-content-center">
+                {% if materiales_deposito.has_previous %}
+                <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page=1">&laquo; Primera</a>
+                </li>
+                <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page={{ materiales_deposito.previous_page_number }}">Anterior</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span style="color: black;" class="page-link">&laquo; Primera</span>
+                </li>
+                <li class="page-item disabled">
+                    <span style="color: black;" class="page-link">Anterior</span>
+                </li>
+                {% endif %}
+        
+                {% for i in materiales_deposito.paginator.page_range %}
+                {% if materiales_deposito.number == i %}
+                <li class="page-item active">
+                    <span style="color: black;" class="page-link">{{ i }}</span>
+                </li>
+                {% else %}
+                {% if i > materiales_deposito.number|add:-7 and i < materiales_deposito.number|add:8 %} <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page={{ i }}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+        
+                    {% if materiales_deposito.has_next %}
+                    <li class="page-item">
+                        <a style="color: black;" class="page-link" href="?page={{ materiales_deposito.next_page_number }}">Siguiente</a>
+                    </li>
+                    <li class="page-item">
+                        <a style="color: black;" class="page-link" href="?page={{ materiales_deposito.paginator.num_pages }}">Última &raquo;</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span style="color: black;" class="page-link">Siguiente</span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span style="color: black;" class="page-link">Última &raquo;</span>
+                    </li>
+                    {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+{% for material_x_deposito in materiales_deposito %}
+<!-- Modal para editar material por depósito -->
+<div class="modal fade" id="editarMaterialDepositoModal{{ material_x_deposito.ID_MXD }}" tabindex="-1"
+    aria-labelledby="editarMaterialDepositoModalLabel{{ material_x_deposito.ID_MXD }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white" id="editarMaterialDepositoModalLabel">Edición de materiales por depósito</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'guardar_edicion_material_x_deposito' material_x_deposito.ID_MXD %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group py-2 form-floating">
+                        <input type="text" id="a"
+                            value="{{ material_x_deposito.ID_Material }} - {{ material_x_deposito.ID_Deposito }}"
+                            class="form-control" disabled required >
+                        <label for="a">Material - Depósito</label>
+                    </div>
+                    <div class="form-group py-2 form-floating">
+                        <input type="number" id="txtStockMin" name="txtStockMin" value="{{ material_x_deposito.Stock_min }}" class="form-control" placeholder="Stock Mínimo" required>
+                        <label for="txtStockMin">Stock Mínimo</label>
+                    </div>
+                    <div class="form-group py-2 form-floating">
+                        <input type="number" id="txtStockMax" name="txtStockMax" value="{{ material_x_deposito.Stock_max }}" class="form-control" placeholder="Stock Máximo" required>
+                        <label for="txtStockMax">Stock Máximo</label>
+                    </div>
+                    <div class="form-group py-2 form-floating">
+                        <input type="text" id="txtUnidadMedida" name="txtUnidadMedida" value="{{ material_x_deposito.Unidad_medida }}" class="form-control" placeholder="Stock Máximo" required>
+                        <label for="txtUnidadMedida">Unidad de medida</label>
+                    </div>
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success bt-block text-white"><i class="bi bi-save"></i> Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

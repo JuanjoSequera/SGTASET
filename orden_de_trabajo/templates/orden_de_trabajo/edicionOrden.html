@@ -1,0 +1,138 @@
+{% extends 'layout.html' %}
+
+{% block title %}Edición de Orden{% endblock %}
+
+{% block content %}
+<div class="row py-2 justify-content-center">
+    <div class="col-sm-12 col-md-8">
+        <h2>Asignar Orden de Trabajo</h2>
+        <div class="card card-center">
+            <div class="card-body">
+                <form action="{% url 'asignar_empleados_moviles' orden.nro_orden %}" method="POST">
+                    {% csrf_token %}
+                    <!-- Campos de Orden de Trabajo -->
+                    <div class="form-group py-2">
+                        <label for="txtNroOrden">Nro. Orden</label>
+                        <input type="text" id="txtNroOrden" name="txtNroOrden" class="form-control" value="{{ orden.nro_orden }}" placeholder="Nro. Orden" required disabled>
+                    </div>
+                    <div class="form-group py-2">
+                        <label for="ddlEmpleadoTecnico">Empleado Técnico</label>
+                        <select id="ddlEmpleadoTecnico" name="empleado_tecnico" class="form-control" required>
+                            <option value="" selected disabled>{{ orden.ID_Empleado_tecnico.Nombre }} {{ orden.ID_Empleado_tecnico.Apellido }}</option>
+                            {% for empleado_tecnico in empleados %}
+                            <option value="{{ empleado_tecnico.ID_Empleado }}" {% if empleado_tecnico == orden.empleado_tecnico %}selected{% endif %}>{{ empleado_tecnico.Nombre }} {{empleado_tecnico.Apellido}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group py-2">
+                        <label for="ddlEmpleadoAyudante">Empleado Ayudante</label>
+                        <select id="ddlEmpleadoAyudante" name="empleado_ayudante" class="form-control" required>
+                            <option value="" selected disabled>{{ orden.ID_Empleado_ayudante.Nombre }} {{orden.ID_Empleado_ayudante.Apellido}}</option>
+                            {% for empleado_ayudante in empleados %}
+                            <option value="{{ empleado_ayudante.ID_Empleado }}" {% if empleado_ayudante == orden.empleado_ayudante %}selected{% endif %}>{{ empleado_ayudante.Nombre }}{{empleado_ayudante.Apellido}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group py-2">
+                        <label for="ddlIdTarea">ID Tareas</label>
+                        <select id="ddlIdTarea" name="tarea" class="form-control" required disabled>
+                            <option value="" selected disabled>{{ orden.ID_Tarea.Nombre  }}</option>
+                            {% for tarea in tareas %}
+                            <option value="{{ tarea.ID_Tarea }}" {% if tarea == orden.tarea %}selected{% endif %}>{{ tarea.Nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group py-2">
+                        <label for="ddlIdDeposito">ID Depósito</label>
+                        <select id="ddlIdDeposito" name="deposito" class="form-control" required>
+                            <option value="" selected disabled>{{ orden.id_deposito.nombre_deposito}}</option>
+                            {% for deposito in depositos %}
+                            <option value="{{ deposito.id_deposito }}" {% if deposito == orden.id_deposito %}selected{% endif %}>{{ deposito.nombre_deposito }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group py-2">
+                        <label for="ddlNumeroAbono">Número de Abonado</label>
+                        <select id="ddlNumeroAbono" name="cliente" class="form-control" required disabled>
+                            <option value="" selected disabled>Seleccione un número de abono</option>
+                            {% for cliente in clientes %}
+                            <option value="{{ cliente.numero_de_abono }}" {% if cliente == orden.numero_de_abono %}selected{% endif %}>{{ cliente.numero_de_abono }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group py-2">
+                        <label for="txtNombreCliente">Nombre y Apellido</label>
+                        <input type="text" id="txtNombreCliente" name="NombreCliente" class="form-control" value="{{ orden.numero_de_abono.nombre }} {{orden.numero_de_abono.apellido}}" required disabled>
+                    </div>
+                    <div class="form-group py-2">
+                        <label for="txtDireccion">Dirección</label>
+                        <input type="text" id="txtDireccion" name="Dirección" class="form-control" value="{{ orden.numero_de_abono.direccion}}" required disabled>
+                    </div>
+                    <div class="form-group py-2">
+                        <label for="txtTelefono">Telefono</label>
+                        <input type="text" id="txtTelefono" name="Telefono" class="form-control" value="{{ orden.numero_de_abono.telefono}}" required disabled>
+                    </div>
+                    
+                    <div class="form-group py-2">
+                        <label for="txtFechaInicio">Fecha Inicio</label>
+                        <input type="date" id="txtFechaInicio" name="fecha_inicio" class="form-control" value="{{ orden.fecha_inicio|date:'Y-m-d' }}" required disabled>
+                    </div>
+                    <div class="form-group py-2">
+                        <label for="txtFechaFin">Fecha Fin</label>
+                        <input type="date" id="txtFechaFin" name="fecha_fin" class="form-control" value="{{ orden.fecha_fin|date:'Y-m-d' }}"  required disabled>
+                    </div>
+                    <div class="form-group py-2">
+                        <label for="txtDescripcion">Descripción</label>
+                        <textarea id="txtDescripcion" name="descripcion" class="form-control" rows="3" required disabled>{{ orden.descripcion }}</textarea>
+                    </div>
+                    <div class="form-group py-2">
+                        <label for="txtObservacion">Observación</label>
+                        <textarea id="txtObservacion" name="observacion" class="form-control" rows="3" disabled></textarea>
+                    </div>
+                    <div class="form-group py-2">
+                        <label for="ddlEstado">Estado</label>
+                        <select id="ddlEstado" name="estado" class="form-control" required>
+                            <option value="" selected disabled>{{ orden.estado }}</option>
+                            <option value="Pendiente" {% if orden.estado == "Pendiente" %}selected{% endif %}>Pendiente</option>
+                            <option value="En Progreso" {% if orden.estado == "En Progreso" %}selected{% endif %}>En Progreso</option>
+                            
+                        </select>
+                    </div>
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success bt-block text-white">Guardar</button>
+                       
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row py-2 justify-content-center">
+    <!-- Sección de la tabla de materiales -->
+    <div class="col-sm-12 col-md-8">
+        <h2>Lista de materiales</h2>
+        <div class="card">
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Material</th>
+                            <th>Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for listamaterial in listamateriales %}
+                        <tr>
+                            <td>{{listamaterial.id_material.nombre_material }}</td>
+                            <td>{{ listamaterial.cantidad }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

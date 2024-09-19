@@ -1,0 +1,60 @@
+{% extends 'layout.html' %}
+
+{% block title %}Gestión de materiales por depósito{% endblock %}
+
+{% block content %}
+<div class="row py-2 justify-content-center">
+    <div class="col-sm-12 col-md-4">
+        <h2>Edición de materiales por depósito</h2>
+        <div class="card card-center">
+            <div class="card-body">
+                <form action="{% url 'guardar_edicion_material_x_deposito' material_x_deposito.ID_MXD %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group py-2">
+                        <select id="ddlMaterial" name="ddlMaterial" class="form-control" required>
+                            <option value="" selected disabled>Seleccione un material</option>
+                            {% for material in materiales %}
+                            <option value="{{ material.id_material }}">{{ material.nombre_material }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group py-2">
+                        <select id="ddlDeposito" name="ddlDeposito" class="form-control" required>
+                            <option value="" selected disabled>Seleccione un depósito</option>
+                            {% for deposito in depositos %}
+                            <option value="{{ deposito.id_deposito }}">{{ deposito.nombre_deposito }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group py-2">
+                        <input type="number" id="txtCantidad" name="txtCantidad"
+                            value="{{ material_x_deposito.Cantidad }}" class="form-control" placeholder="Cantidad"
+                            required>
+                    </div>
+                    <div class="form-group py-2">
+                        <input type="number" id="txtStockMin" name="txtStockMin"
+                            value="{{ material_x_deposito.Stock_min }}" class="form-control" placeholder="Stock Mínimo"
+                            required>
+                    </div>
+                    <div class="form-group py-2">
+                        <input type="number" id="txtStockMax" name="txtStockMax"
+                            value="{{ material_x_deposito.Stock_max }}" class="form-control" placeholder="Stock Máximo"
+                            required>
+                    </div>
+                    <div class="form-group py-2">
+                        <input type="text" id="txtUnidadMedida" name="txtUnidadMedida"
+                            value="{{ material_x_deposito.Unidad_medida }}" class="form-control"
+                            placeholder="Unidad de Medida" required>
+                    </div>
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success bt-block text-white">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

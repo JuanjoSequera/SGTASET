@@ -1,0 +1,3 @@
+Estado=[
+    ('Activo','Inactivo')
+]

@@ -1,0 +1,269 @@
+{% extends 'layout.html' %}
+
+{% block title %}Gestión de movimientos{% endblock %}
+
+{% block content %}
+<div class="row py-2">
+    <div class="col-sm-12">
+        <!-- mensaje de pantalla -->
+        {% for message in messages %}
+            {% if message.tags == 'warning' %}
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script>
+                    var m = '{{ message }}'
+                    Swal.fire(
+                        '',
+                        m,
+                        'warning'
+                    )
+                </script>
+            {% elif message.tags == 'error' %}
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script>
+                    var m = '{{ message }}'
+                    Swal.fire(
+                        '',
+                        m,
+                        'error'
+                    )
+                </script>
+            {% else %}
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script>
+                    var m = '{{ message }}'
+                    Swal.fire(
+                        '',
+                        m,
+                        'success'
+                    )
+                </script>
+            {% endif %}
+        {% endfor %}
+        <h1>Gestión de movimientos</h1>
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#registrarMovimientoModal">
+            <i class="bi bi-plus"></i> Registrar Movimiento
+        </button>
+        <!-- Formulario de búsqueda -->
+        <form class="form-inline my-2 my-lg-0" action="{% url 'movimientos' %}" method="GET">
+            <div class="input-group mb-3" style="width: 30%;">
+                <button class="btn btn-outline-success" type="submit"><i class="bi bi-search"></i> Buscar</button>
+                <input class="form-control mr-sm-2" type="search" name="q" value="{{ search_query }}"
+                    placeholder="Buscar por concepto" aria-label="Buscar">
+            </div>
+        </form>
+        <div class="table responsive py-2">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Material - Depósito</th>
+                        <th>Concepto</th>
+                        <th>Cantidad</th>
+                        <th>Fecha</th>
+                        <th>Tipo de movimiento</th>
+                        <th>Empleado</th>
+                        <th colspan="2">Opciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movimiento in movimientos %}
+                    <tr>
+                        <td>{{ movimiento.ID_MXD }}</td>
+                        <td>{{ movimiento.Concepto }}</td>
+                        <td>{{ movimiento.Cantidad }}</td>
+                        <td>{{ movimiento.Fecha }}</td>
+                        <td>{{ movimiento.get_Signo_display }}</td>
+                        <td>{{ movimiento.ID_Empleado }}</td>
+                        <td>
+                            <a href="#" class="btn btn-info text-white" data-bs-toggle="modal"
+                                data-bs-target="#editarMovimientoModal{{ movimiento.ID_Movimiento }}">
+                                <i class="bi bi-credit-card-fill"></i> Editar
+                            </a>
+                        </td>
+                        <td><a href="/movimiento/eliminarMovimiento/{{ movimiento.ID_Movimiento }}"
+                                class="btn btn-danger btnEliminacion">Eliminar</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Paginación -->
+        <nav aria-label="Paginación de movimientos">
+            <ul class="pagination justify-content-center">
+                {% if movimientos.has_previous %}
+                <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page=1">&laquo; Primera</a>
+                </li>
+                <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page={{ movimientos.previous_page_number }}">Anterior</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span style="color: black;" class="page-link">&laquo; Primera</span>
+                </li>
+                <li class="page-item disabled">
+                    <span style="color: black;" class="page-link">Anterior</span>
+                </li>
+                {% endif %}
+        
+                {% for i in movimientos.paginator.page_range %}
+                {% if movimientos.number == i %}
+                <li class="page-item active">
+                    <span style="color: black;" class="page-link">
+                        {{ i }}
+                    </span>
+                </li>
+                {% else %}
+                {% if i > movimientos.number|add:-7 and i < movimientos.number|add:8 %} <li class="page-item">
+                    <a style="color: black;" class="page-link" href="?page={{ i }}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+        
+                    {% if movimientos.has_next %}
+                    <li class="page-item">
+                        <a style="color: black;" class="page-link" href="?page={{ movimientos.next_page_number }}">Siguiente</a>
+                    </li>
+                    <li class="page-item">
+                        <a style="color: black;" class="page-link" href="?page={{ movimientos.paginator.num_pages }}">&raquo;
+                            Última</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Siguiente</span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">&raquo; Última</span>
+                    </li>
+                    {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Modal para Registrar Movimiento -->
+<div class="modal fade" id="registrarMovimientoModal" tabindex="-1" aria-labelledby="registrarMovimientoModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white" id="registrarMovimientoModalLabel">Registrar Movimiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'registrarMovimiento' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group form-floating py-2">
+                        <select id="ddlMaterialDeposito" name="ddlMaterialDeposito" class="form-control" required>
+                            <option value="" selected disabled>Seleccione el material - deposito</option>
+                            {% for material_x_deposito in materiales_x_depositos %}
+                            <option value="{{ material_x_deposito.ID_MXD }}">{{ material_x_deposito.ID_Material }} -
+                                {{ material_x_deposito.ID_Deposito }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="ddlMaterialDeposito">Material - Deposito</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <select id="ddlEmpleado" name="ddlEmpleado" class="form-control" required>
+                            <option value="" selected disabled>Seleccione el empleado</option>
+                            {% for empleado in empleados %}
+                            <option value="{{ empleado.ID_Empleado }}">{{ empleado.Nombre }} {{ empleado.Apellido }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="ddlEmpleado">Empleado</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="text" id="txtConcepto" name="txtConcepto" class="form-control" placeholder="" required>
+                        <label for="txtConcepto">Concepto</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="number" id="txtCantidad" name="txtCantidad" class="form-control" placeholder="" required min="0">
+                        <label for="txtCantidad">Cantidad</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <select id="ddlSigno" name="ddlSigno" class="form-control" required>
+                            <option value="" selected disabled>Seleccione un tipo de movimiento</option>
+                            <option value="1">Entrada</option>
+                            <option value="-1">Salida</option>
+                        </select>
+                        <label for="ddlSigno">Tipo de movimiento</label>
+                    </div>
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success bt-block text-white"><i class="bi bi-save"></i> Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for movimiento in movimientos %}
+<!-- Modal para editar el movimiento -->
+<div class="modal fade" id="editarMovimientoModal{{ movimiento.ID_Movimiento }}" tabindex="-1"
+    aria-labelledby="editarMovimientoModalLabel{{ movimiento.ID_Movimiento }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white" id="editarMovimientoModalLabel{{ movimiento.ID_Movimiento }}">Editar
+                    Movimiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'editarMovimiento' movimiento.ID_Movimiento %}" method="POST">{% csrf_token %}
+                    <div class="form-group form-floating py-2">
+                        <select id="ddlMaterialDeposito" name="ddlMaterialDeposito" class="form-control" required>
+                            {% for material_x_deposito in materiales_x_depositos %}
+                                {% if material_x_deposito.ID_MXD == movimiento.ID_MXD.ID_MXD %}
+                                    <option value="{{ material_x_deposito.ID_MXD }}" selected>{{ material_x_deposito.ID_Material }} -
+                                        {{ material_x_deposito.ID_Deposito }}</option>
+                                {% else %}
+                                    <option value="{{ material_x_deposito.ID_MXD }}">{{ material_x_deposito.ID_Material }} -
+                                        {{ material_x_deposito.ID_Deposito }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <label for="ddlMaterialDeposito">Material - Deposito</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <select id="ddlEmpleado" name="ddlEmpleado" class="form-control" required>
+                            {% for empleado in empleados %}
+                                {% if empleado.ID_Empleado == movimiento.ID_Empleado.ID_Empleado %}
+                                    <option value="{{ empleado.ID_Empleado }}" selected>{{ empleado.Nombre }} {{ empleado.Apellido }}</option>
+                                {% else %}
+                                    <option value="{{ empleado.ID_Empleado }}">{{ empleado.Nombre }} {{ empleado.Apellido }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <label for="ddlEmpleado">Empleado</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="text" id="txtConcepto" name="txtConcepto" value="{{ movimiento.Concepto }}" class="form-control" placeholder="" required>
+                        <label for="txtConcepto">Concepto</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <input type="number" id="txtCantidad" name="txtCantidad" value="{{ movimiento.Cantidad }}" class="form-control" placeholder="" required min="0">
+                        <label for="txtCantidad">Cantidad</label>
+                    </div>
+                    <div class="form-group form-floating py-2">
+                        <select id="ddlSigno" name="ddlSigno" class="form-control" required>
+                            {% if movimiento.Signo == 1 %}
+                                <option value="1">Entrada</option>
+                                <option value="-1">Salida</option>
+                            {% else %}
+                                <option value="-1">Salida</option>
+                                <option value="1">Entrada</option>
+                            {% endif %}
+                        </select>
+                        <label for="ddlSigno">Tipo de movimiento</label>
+                    </div>
+                    <div class="d-grid py-2">
+                        <button type="submit" class="btn btn-success bt-block text-white"><i class="bi bi-save"></i> Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

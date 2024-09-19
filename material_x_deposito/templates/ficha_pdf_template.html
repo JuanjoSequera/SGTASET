@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Materiales por Depósito</title>
+    <!-- Agregar enlaces a los archivos CSS de Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <style>
+        /* Estilos de la cabecera */
+        header {
+            background-color: #007BFF;
+            color: #fff;
+            text-align: left;
+            padding: 10px 20px;
+            font-size: 20px;
+        }
+
+        /* Estilos de la tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+            font-size: 15px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        h1 {
+            font-size: 20px;
+        }
+        h2 {
+            font-size: 17px;
+        }
+        h3 {
+            font-size: 14px;
+        }
+
+        /* Estilos del pie de página */
+        footer {
+            text-align: left;
+            padding: 10px;
+            font-size: 12px;
+            color: #333;
+            border-top: 1px solid #ccc;
+        }
+        .titulo,
+        li {
+            padding-top: 10px;
+        }
+        .cabecera {
+            padding-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Cabecera -->
+    <header>
+        <div class="container py-2">
+            <div class="row">
+                <div class="titulo cabecera">Asistelco</div>
+                <div class="col cabecera">Dirección: Teniente ferreira 123</div>
+                <div class="col cabecera">Teléfono: 123-456-7890</div>
+            </div>
+        </div>
+    </header>
+    <h1>Detalles de Material por Depósito</h1>
+    <h2>Material: {{ material_x_deposito.ID_Material.nombre_material }}</h2>
+    <h2>Depósito: {{ material_x_deposito.ID_Deposito.nombre_deposito }}</h2>
+
+    <h3>Ficha de actividades:</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Cantidad</th>
+            <th>Saldo</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in entries %}
+        <tr>
+            <td>{{ entry.Fecha }}</td>
+            <td>{{ entry.tipo }}</td>
+            <td>{{ entry.Cantidad }}</td>
+            <td>{{ entry.saldo }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+    <!-- Pie de página -->
+    <footer class="mt-5">
+        <div class="container">
+            <h1>Contacto:</h1>
+            <div class="col">www.asistelco.com</div>
+            <div class="col">Email: info@asistelco.com</div>
+            <div class="col">Dirección: Teniente ferreira 123</div>
+        </div>
+    </footer>
+    
+</body>
+
+
+</html>
